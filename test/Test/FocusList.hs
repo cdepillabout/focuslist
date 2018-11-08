@@ -1,8 +1,8 @@
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Test.FocusList where
-
-import Termonad.Prelude
 
 import Data.GenValidity.Sequence ()
 import Test.QuickCheck (Gen)
@@ -11,7 +11,7 @@ import Test.Tasty.Hedgehog (testProperty)
 import Test.Tasty.Hspec (Spec, testSpec)
 import Test.Validity (GenInvalid, GenUnchecked, GenValid(genValid), Validity(validate), check, eqSpec, genValidSpec)
 
-import Termonad.FocusList (Focus, FocusList, genValidFL, invariantFL)
+import Data.FocusList (Focus, FocusList, genValidFL, invariantFL)
 
 import Test.FocusList.Invariants (testInvariantsInFocusList)
 

@@ -1,8 +1,7 @@
 
 module Test.FocusList.Invariants where
 
-import Termonad.Prelude
-
+import Data.Maybe (catMaybes)
 import Hedgehog
   ( Gen
   , Property
@@ -17,7 +16,7 @@ import Hedgehog
 import Hedgehog.Gen (alphaNum, choice, int, string)
 import Hedgehog.Range (constant, linear)
 
-import Termonad.FocusList
+import Data.FocusList
   ( FocusList
   , deleteFL
   , emptyFL
