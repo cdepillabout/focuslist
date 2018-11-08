@@ -1,7 +1,6 @@
 
 module Test.FocusList.Invariants where
 
-import Control.Lens ((^.))
 import Hedgehog
   ( Gen
   , Property

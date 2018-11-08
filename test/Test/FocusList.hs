@@ -11,7 +11,7 @@ import Test.Tasty.Hspec (Spec, testSpec)
 import Test.Validity (GenInvalid, GenUnchecked(genUnchecked, shrinkUnchecked), GenValid(genValid), Validity(validate), check, eqSpec, genValidSpec)
 
 import Data.FocusList (Focus, FocusList, invariantFL)
-import Data.Sequence(Seq)
+import Data.Sequence (Seq)
 
 import Test.FocusList.Invariants (testInvariantsInFocusList)
 
