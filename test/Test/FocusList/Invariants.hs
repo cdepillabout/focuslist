@@ -1,7 +1,7 @@
 
 module Test.FocusList.Invariants where
 
-import Control.Lens ((^.))
+import Data.Maybe (catMaybes)
 import Hedgehog
   ( Gen
   , Property
@@ -18,7 +18,6 @@ import Hedgehog.Range (constant, linear)
 
 import Data.FocusList
   ( FocusList
-  , debugFL
   , deleteFL
   , emptyFL
   , insertFL
@@ -28,7 +27,6 @@ import Data.FocusList
   , lookupFL
   , removeFL
   )
-import Data.Maybe (catMaybes)
 
 testInvariantsInFocusList :: Property
 testInvariantsInFocusList =
@@ -80,7 +78,7 @@ genDeleteFL fl
                 "\nkey: " <>
                 show keyForItemToDelete <>
                 "\nfocus list: " <>
-                debugFL fl
+                show fl
           in error msg
         Just item -> pure $ DeleteFL item
 
@@ -96,7 +94,7 @@ generateAction valGen fl = do
     [] ->
       let msg =
             "No generators available for fl:\n" <>
-            debugFL fl
+            show fl
       in error msg
     _ -> do
       choice generators
