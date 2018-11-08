@@ -75,5 +75,5 @@ main = do
 
 ## Maintainers
 
-- [Grendel-GrendelGrendel](https://github.com/Grendel-Grendel-Grendel)
+- [Grendel-Grendel-Grendel](https://github.com/Grendel-Grendel-Grendel)
 - [cdepillabout](https://github.com/cdepillabout)
