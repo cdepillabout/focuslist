@@ -2,6 +2,7 @@
 module Test.FocusList.Invariants where
 
 import Data.Maybe (catMaybes)
+import Data.Semigroup ((<>))
 import Hedgehog
   ( Gen
   , Property
