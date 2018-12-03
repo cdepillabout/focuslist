@@ -29,7 +29,7 @@ flag buildreadme
 library
   hs-source-dirs:      src
   exposed-modules:     Data.FocusList
-  build-depends:       base >= 4.9 
+  build-depends:       base >= 4.9 && < 5
                      , containers >= 0.5.8
                      , lens >= 4.16
                      , mono-traversable
