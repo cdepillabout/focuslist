@@ -102,7 +102,7 @@ matrix:
   #   compiler: ": #stack 8.0.2"
   #   addons: {apt: {packages: [libgmp-dev]}}
 
-  # Doesn't build because QuickCheck version in lts-11 is broken?
+  # The quickcheck properties in the doctests don't work for some reason in lts-11.
   # - env: BUILD=stack ARGS="--resolver lts-11"
   #   compiler: ": #stack 8.2.2"
   #   addons: {apt: {packages: [libgmp-dev]}}
