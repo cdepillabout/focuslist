@@ -22,11 +22,11 @@ instance GenUnchecked a => GenUnchecked (FocusList a)
 instance Validity (FocusList a) where
   validate fl = check (invariantFL fl) "the FocusList has been constructed correctly"
 
-instance GenValid a => GenValid (FocusList a) where
+instance (GenValid a, GenUnchecked a) => GenValid (FocusList a) where
   genValid :: Gen (FocusList a)
   genValid = genValidFL genValid
 
-instance GenInvalid a => GenInvalid (FocusList a)
+instance (GenInvalid a, GenUnchecked a) => GenInvalid (FocusList a)
 
 focusListTestsIO :: IO TestTree
 focusListTestsIO = do
