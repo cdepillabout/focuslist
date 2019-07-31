@@ -11,7 +11,7 @@ A `FocusList` is a sequence of elements which has one element as its `Focus`. It
 supports quick insertion and indexing by its implementation with
 [`Seq`](http://hackage.haskell.org/package/containers-0.6.0.1/docs/Data-Sequence.html#t:Seq).
 
-The fcuslist package is similar to [pointed-list](http://hackage.haskell.org/package/pointedlist-0.6.1) or [list-zipper](http://hackage.haskell.org/package/ListZipper). Focuslist however is optimised for fast indexing and insertion at any point, and can be empty. For operations where linked lists perform better the other packages are likely to be superior, though for other operations focuslist is likely to be faster.
+The focuslist package is similar to [pointed-list](http://hackage.haskell.org/package/pointedlist-0.6.1) or [list-zipper](http://hackage.haskell.org/package/ListZipper). Focuslist however is optimised for fast indexing and insertion at any point, and can be empty. For operations where linked lists perform better the other packages are likely to be superior, though for other operations focuslist is likely to be faster.
 
 ## Example
 
