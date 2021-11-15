@@ -5,10 +5,11 @@
 module Test.FocusList where
 
 import Data.GenValidity.Sequence ()
+import Test.Hspec (Spec)
 import Test.QuickCheck (Gen)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Hedgehog (testProperty)
-import Test.Tasty.Hspec (Spec, testSpec)
+import Test.Tasty.Hspec (testSpec)
 import Test.Validity (GenInvalid, GenUnchecked, GenValid(genValid), Validity(validate), check, eqSpec, genValidSpec)
 
 import Data.FocusList (Focus, FocusList, genValidFL, invariantFL)

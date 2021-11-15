@@ -60,6 +60,7 @@ test-suite focuslist-test
                      , genvalidity-containers >= 0.5
                      , genvalidity-hspec >= 0.6
                      , hedgehog >= 0.6.1
+                     , hspec
                      , lens
                      , QuickCheck
                      , tasty >= 1.1
