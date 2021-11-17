@@ -1,4 +1,4 @@
-name: password
+name: focuslist
 
 # Trigger the workflow on push or pull request, but only for the master branch
 on:
@@ -68,7 +68,7 @@ jobs:
           - "--resolver lts-16" # GHC 8.8.4
           - "--resolver lts-17" # GHC 8.10.4
           - "--stack-yaml ./stack.yaml" # Default stack.yaml (8.10.7)
-          - "--resolver nightly" # GHC 9.0.*
+          # - "--resolver nightly" # GHC 9.0.*
 
     steps:
     - uses: actions/checkout@v2
