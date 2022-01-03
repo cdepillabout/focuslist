@@ -35,6 +35,7 @@ module Data.FocusList
   , moveFromToFL
   , intersperseFL
   , reverseFL
+  , updateFocusItemFL
     -- *** Manipulate 'Focus'
   , setFocusFL
   , updateFocusFL
@@ -60,10 +61,10 @@ module Data.FocusList
   , lensFocusList
     -- * Focus
   , Focus(Focus, NoFocus)
-    , hasFocus
-    , getFocus
-    , maybeToFocus
-    , foldFocus
+  , hasFocus
+  , getFocus
+  , maybeToFocus
+  , foldFocus
     -- ** Optics
   , _Focus
   , _NoFocus
@@ -676,6 +677,45 @@ getFocusItemFL fl =
             show i <>
             ") doesnt exist in sequence"
         Just a -> Just a
+
+-- | Update the item the 'FocusList' is focusing on.  Do nothing if
+-- the 'FocusList' is empty.
+--
+-- >>> let Just fl = fromListFL (Focus 1) [10, 20, 30]
+-- >>> updateFocusItemFL (\a -> a + 5) fl
+-- FocusList (Focus 1) [10,25,30]
+--
+-- >>> updateFocusItemFL (\a -> a * 100) emptyFL
+-- FocusList NoFocus []
+--
+-- Note: this function forces the updated item.  The following throws an
+-- exception from 'undefined' even though we updated the focused item at index
+-- 1, but lookup the item at index 0.
+--
+-- >>> let Just fl = fromListFL (Focus 1) [10, 20, 30]
+-- >>> let newFl = updateFocusItemFL (const undefined) fl
+-- >>> lookupFL 0 newFl
+-- *** Exception: ...
+-- ...
+--
+-- /complexity/: @O(log(min(i, n - i)))@ where @i@ is the 'Focus', and @n@
+-- is the length of the 'FocusList'.
+updateFocusItemFL :: (a -> a) -> FocusList a -> FocusList a
+updateFocusItemFL f fl =
+  let focus = fl ^. lensFocusListFocus
+  in
+  case focus of
+    NoFocus -> fl
+    Focus i ->
+      let fls = fl ^. lensFocusList
+      in
+      case Sequence.lookup i fls of
+        Nothing ->
+          error $
+            "updateFocusItemFL: internal error, i (" <>
+            show i <>
+            ") doesnt exist in sequence"
+        Just a -> fl { focusList = Sequence.adjust' f i fls }
 
 -- | Lookup the element at the specified index, counting from 0.
 --
