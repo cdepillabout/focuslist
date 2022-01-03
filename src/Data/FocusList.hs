@@ -36,6 +36,7 @@ module Data.FocusList
   , intersperseFL
   , reverseFL
   , updateFocusItemFL
+  , setFocusItemFL
     -- *** Manipulate 'Focus'
   , setFocusFL
   , updateFocusFL
@@ -677,6 +678,34 @@ getFocusItemFL fl =
             show i <>
             ") doesnt exist in sequence"
         Just a -> Just a
+
+-- | Set the item the 'FocusList' is focusing on.
+--
+-- >>> let Just fl = fromListFL (Focus 1) [10, 20, 30]
+-- >>> setFocusItemFL 0 fl
+-- FocusList (Focus 1) [10,0,30]
+--
+-- >>> setFocusItemFL "hello" emptyFL
+-- FocusList NoFocus []
+--
+-- Note: this function forces the updated item.  The following throws an
+-- exception from 'undefined' even though we updated the focused item at index
+-- 1, but lookup the item at index 0.
+--
+-- >>> let Just fl = fromListFL (Focus 1) [10, 20, 30]
+-- >>> let newFl = setFocusItemFL undefined fl
+-- >>> lookupFL 0 newFl
+-- *** Exception: ...
+-- ...
+--
+-- This is a specialization of 'updateFocusItemFL':
+--
+-- prop> updateFocusItemFL (const a) fl == setFocusItemFL a fl
+--
+-- /complexity/: @O(log(min(i, n - i)))@ where @i@ is the 'Focus', and @n@
+-- is the length of the 'FocusList'.
+setFocusItemFL :: a -> FocusList a -> FocusList a
+setFocusItemFL a fl = updateFocusItemFL (const a) fl
 
 -- | Update the item the 'FocusList' is focusing on.  Do nothing if
 -- the 'FocusList' is empty.
