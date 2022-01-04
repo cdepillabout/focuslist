@@ -778,14 +778,7 @@ updateFocusItemFL f fl =
     NoFocus -> fl
     Focus i ->
       let fls = fl ^. lensFocusList
-      in
-      case Sequence.lookup i fls of
-        Nothing ->
-          error $
-            "updateFocusItemFL: internal error, i (" <>
-            show i <>
-            ") doesnt exist in sequence"
-        Just a -> fl { focusList = Sequence.adjust' f i fls }
+      in fl { focusList = Sequence.adjust' f i fls }
 
 -- | Lookup the element at the specified index, counting from 0.
 --
