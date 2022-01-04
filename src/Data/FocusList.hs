@@ -82,7 +82,6 @@ import Data.Foldable (toList)
 import Data.Function ((&))
 import Data.MonoTraversable
   (Element, GrowingAppend, MonoFoldable, MonoFunctor, MonoTraversable, olength)
-import Data.Semigroup ((<>))
 import qualified Data.Sequence as Sequence
 import Data.Sequence
   (Seq((:<|), Empty), (<|), deleteAt, elemIndexL, insertAt, singleton)
@@ -94,7 +93,6 @@ import Test.QuickCheck
   ( Arbitrary, Arbitrary1, CoArbitrary, Gen, arbitrary, arbitrary1, choose
   , frequency, liftArbitrary
   )
-import Text.Show (Show(showsPrec), ShowS, showParen, showString)
 
 -- $setup
 -- >>> :set -XFlexibleContexts
