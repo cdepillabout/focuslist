@@ -2,6 +2,11 @@
 
 ## Unreleased changes
 
+## v0.1.1.0
+
+- Add functions `updateFocusItemFL`, `setFocusItemFL`, and `traversalFocusItem`.
+  [#13](https://github.com/cdepillabout/focuslist/pull/13).
+
 ## v0.1.0.2
 
 - Update to allow the latest version of genvalidity

@@ -35,6 +35,10 @@ module Data.FocusList
   , moveFromToFL
   , intersperseFL
   , reverseFL
+  , updateFocusItemFL
+  , setFocusItemFL
+  , -- *** Optics
+    traversalFocusItem
     -- *** Manipulate 'Focus'
   , setFocusFL
   , updateFocusFL
@@ -60,10 +64,10 @@ module Data.FocusList
   , lensFocusList
     -- * Focus
   , Focus(Focus, NoFocus)
-    , hasFocus
-    , getFocus
-    , maybeToFocus
-    , foldFocus
+  , hasFocus
+  , getFocus
+  , maybeToFocus
+  , foldFocus
     -- ** Optics
   , _Focus
   , _NoFocus
@@ -73,12 +77,11 @@ module Data.FocusList
 
 import Prelude hiding (reverse)
 
-import Control.Lens (Prism', (^.), (.~), (-~), makeLensesFor, prism')
+import Control.Lens (Prism', Traversal', (^.), (.~), (-~), makeLensesFor, prism')
 import Data.Foldable (toList)
 import Data.Function ((&))
 import Data.MonoTraversable
   (Element, GrowingAppend, MonoFoldable, MonoFunctor, MonoTraversable, olength)
-import Data.Semigroup ((<>))
 import qualified Data.Sequence as Sequence
 import Data.Sequence
   (Seq((:<|), Empty), (<|), deleteAt, elemIndexL, insertAt, singleton)
@@ -90,12 +93,12 @@ import Test.QuickCheck
   ( Arbitrary, Arbitrary1, CoArbitrary, Gen, arbitrary, arbitrary1, choose
   , frequency, liftArbitrary
   )
-import Text.Show (Show(showsPrec), ShowS, showParen, showString)
 
 -- $setup
 -- >>> :set -XFlexibleContexts
 -- >>> :set -XScopedTypeVariables
 -- >>> import Data.Maybe (isJust)
+-- >>> import Control.Lens ((^..))
 
 -- | A 'Focus' for the 'FocusList'.
 --
@@ -139,10 +142,24 @@ foldFocus b _ NoFocus = b
 foldFocus _ f (Focus i) = f i
 
 -- | A 'Prism'' for focusing on the 'Focus' constructor in a 'Focus' data type.
+--
+-- You can use this to get the 'Int' that is being focused on:
+--
+-- >>> import Control.Lens ((^?))
+-- >>> Focus 100 ^? _Focus
+-- Just 100
+-- >>> NoFocus ^? _Focus
+-- Nothing
 _Focus :: Prism' Focus Int
 _Focus = prism' Focus (foldFocus Nothing Just)
 
 -- | A 'Prism'' for focusing on the 'NoFocus' constructor in a 'Focus' data type.
+--
+-- >>> import Control.Lens.Extras (is)
+-- >>> is _NoFocus NoFocus
+-- True
+-- >>> is _NoFocus (Focus 3)
+-- False
 _NoFocus :: Prism' Focus ()
 _NoFocus = prism' (const NoFocus) (foldFocus (Just ()) (const Nothing))
 
@@ -225,6 +242,44 @@ $(makeLensesFor
     ]
     ''FocusList
  )
+
+-- | A 'Traversal' for the focused item in a 'FocusList'.
+--
+-- This can be used to get the focused item:
+--
+-- >>> import Control.Lens ((^?))
+-- >>> let Just fl = fromListFL (Focus 1) ["hello", "bye", "tree"]
+-- >>> fl ^? traversalFocusItem
+-- Just "bye"
+-- >>> emptyFL ^? traversalFocusItem
+-- Nothing
+--
+-- This can also be used to set the focused item:
+--
+-- >>> import Control.Lens (set)
+-- >>> let Just fl = fromListFL (Focus 1) ["hello", "bye", "tree"]
+-- >>> set traversalFocusItem "new val" fl
+-- FocusList (Focus 1) ["hello","new val","tree"]
+-- >>> set traversalFocusItem "new val" emptyFL
+-- FocusList NoFocus []
+--
+-- Note that this traversal will apply to no elements if the 'FocusList' is
+-- empty and 'NoFocus'.  This traversal will apply to a single element if the
+-- 'FocusList' has a 'Focus'.  This makes 'traversalFocusItem' an affine traversal.
+--
+-- prop> length (fl ^.. traversalFocusItem) <= 1
+traversalFocusItem :: forall a. Traversal' (FocusList a) a
+traversalFocusItem f fl@FocusList {focusListFocus, focusList} =
+  case focusListFocus of
+    NoFocus -> pure fl
+    Focus focus ->
+      case Sequence.lookup focus focusList of
+        Nothing ->
+          error $
+            "traersalFLItem: internal error, focus (" <>
+            show focus <>
+            ") doesnt exist in sequence"
+        Just a -> fmap (\a' -> setFocusItemFL a' fl) (f a)
 
 instance Foldable FocusList where
   foldr f b (FocusList _ fls) = foldr f b fls
@@ -676,6 +731,66 @@ getFocusItemFL fl =
             show i <>
             ") doesnt exist in sequence"
         Just a -> Just a
+
+-- | Set the item the 'FocusList' is focusing on.
+--
+-- >>> let Just fl = fromListFL (Focus 1) [10, 20, 30]
+-- >>> setFocusItemFL 0 fl
+-- FocusList (Focus 1) [10,0,30]
+--
+-- >>> setFocusItemFL "hello" emptyFL
+-- FocusList NoFocus []
+--
+-- Note: this function forces the updated item.  The following throws an
+-- exception from 'undefined' even though we updated the focused item at index
+-- 1, but lookup the item at index 0.
+--
+-- >>> let Just fl = fromListFL (Focus 1) [10, 20, 30]
+-- >>> let newFl = setFocusItemFL undefined fl
+-- >>> lookupFL 0 newFl
+-- *** Exception: ...
+-- ...
+--
+-- This is a specialization of 'updateFocusItemFL':
+--
+-- prop> updateFocusItemFL (const a) fl == setFocusItemFL a fl
+--
+-- /complexity/: @O(log(min(i, n - i)))@ where @i@ is the 'Focus', and @n@
+-- is the length of the 'FocusList'.
+setFocusItemFL :: a -> FocusList a -> FocusList a
+setFocusItemFL a fl = updateFocusItemFL (const a) fl
+
+-- | Update the item the 'FocusList' is focusing on.  Do nothing if
+-- the 'FocusList' is empty.
+--
+-- >>> let Just fl = fromListFL (Focus 1) [10, 20, 30]
+-- >>> updateFocusItemFL (\a -> a + 5) fl
+-- FocusList (Focus 1) [10,25,30]
+--
+-- >>> updateFocusItemFL (\a -> a * 100) emptyFL
+-- FocusList NoFocus []
+--
+-- Note: this function forces the updated item.  The following throws an
+-- exception from 'undefined' even though we updated the focused item at index
+-- 1, but lookup the item at index 0.
+--
+-- >>> let Just fl = fromListFL (Focus 1) [10, 20, 30]
+-- >>> let newFl = updateFocusItemFL (const undefined) fl
+-- >>> lookupFL 0 newFl
+-- *** Exception: ...
+-- ...
+--
+-- /complexity/: @O(log(min(i, n - i)))@ where @i@ is the 'Focus', and @n@
+-- is the length of the 'FocusList'.
+updateFocusItemFL :: (a -> a) -> FocusList a -> FocusList a
+updateFocusItemFL f fl =
+  let focus = fl ^. lensFocusListFocus
+  in
+  case focus of
+    NoFocus -> fl
+    Focus i ->
+      let fls = fl ^. lensFocusList
+      in fl { focusList = Sequence.adjust' f i fls }
 
 -- | Lookup the element at the specified index, counting from 0.
 --
