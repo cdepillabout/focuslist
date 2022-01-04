@@ -144,10 +144,24 @@ foldFocus b _ NoFocus = b
 foldFocus _ f (Focus i) = f i
 
 -- | A 'Prism'' for focusing on the 'Focus' constructor in a 'Focus' data type.
+--
+-- You can use this to get the 'Int' that is being focused on:
+--
+-- >>> import Control.Lens ((^?))
+-- >>> Focus 100 ^? _Focus
+-- Just 100
+-- >>> NoFocus ^? _Focus
+-- Nothing
 _Focus :: Prism' Focus Int
 _Focus = prism' Focus (foldFocus Nothing Just)
 
 -- | A 'Prism'' for focusing on the 'NoFocus' constructor in a 'Focus' data type.
+--
+-- >>> import Control.Lens.Extras (is)
+-- >>> is _NoFocus NoFocus
+-- True
+-- >>> is _NoFocus (Focus 3)
+-- False
 _NoFocus :: Prism' Focus ()
 _NoFocus = prism' (const NoFocus) (foldFocus (Just ()) (const Nothing))
 
