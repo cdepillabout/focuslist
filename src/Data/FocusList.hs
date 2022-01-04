@@ -37,6 +37,8 @@ module Data.FocusList
   , reverseFL
   , updateFocusItemFL
   , setFocusItemFL
+  , -- *** Optics
+    traversalFocusItem
     -- *** Manipulate 'Focus'
   , setFocusFL
   , updateFocusFL
@@ -75,7 +77,7 @@ module Data.FocusList
 
 import Prelude hiding (reverse)
 
-import Control.Lens (Prism', (^.), (.~), (-~), makeLensesFor, prism')
+import Control.Lens (Prism', Traversal', (^.), (.~), (-~), makeLensesFor, prism')
 import Data.Foldable (toList)
 import Data.Function ((&))
 import Data.MonoTraversable
@@ -98,6 +100,7 @@ import Text.Show (Show(showsPrec), ShowS, showParen, showString)
 -- >>> :set -XFlexibleContexts
 -- >>> :set -XScopedTypeVariables
 -- >>> import Data.Maybe (isJust)
+-- >>> import Control.Lens ((^..))
 
 -- | A 'Focus' for the 'FocusList'.
 --
@@ -227,6 +230,44 @@ $(makeLensesFor
     ]
     ''FocusList
  )
+
+-- | A 'Traversal' for the focused item in a 'FocusList'.
+--
+-- This can be used to get the focused item:
+--
+-- >>> import Control.Lens ((^?))
+-- >>> let Just fl = fromListFL (Focus 1) ["hello", "bye", "tree"]
+-- >>> fl ^? traversalFocusItem
+-- Just "bye"
+-- >>> emptyFL ^? traversalFocusItem
+-- Nothing
+--
+-- This can also be used to set the focused item:
+--
+-- >>> import Control.Lens (set)
+-- >>> let Just fl = fromListFL (Focus 1) ["hello", "bye", "tree"]
+-- >>> set traversalFocusItem "new val" fl
+-- FocusList (Focus 1) ["hello","new val","tree"]
+-- >>> set traversalFocusItem "new val" emptyFL
+-- FocusList NoFocus []
+--
+-- Note that this traversal will apply to no elements if the 'FocusList' is
+-- empty and 'NoFocus'.  This traversal will apply to a single element if the
+-- 'FocusList' has a 'Focus'.  This makes 'traversalFocusItem' an affine traversal.
+--
+-- prop> length (fl ^.. traversalFocusItem) <= 1
+traversalFocusItem :: forall a. Traversal' (FocusList a) a
+traversalFocusItem f fl@FocusList {focusListFocus, focusList} =
+  case focusListFocus of
+    NoFocus -> pure fl
+    Focus focus ->
+      case Sequence.lookup focus focusList of
+        Nothing ->
+          error $
+            "traersalFLItem: internal error, focus (" <>
+            show focus <>
+            ") doesnt exist in sequence"
+        Just a -> fmap (\a' -> setFocusItemFL a' fl) (f a)
 
 instance Foldable FocusList where
   foldr f b (FocusList _ fls) = foldr f b fls
