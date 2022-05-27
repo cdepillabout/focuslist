@@ -433,7 +433,7 @@ invariantFL fl =
 -- >>> unsafeFromListFL NoFocus []
 -- FocusList NoFocus []
 --
--- 'unsafeFromListFL' can also be used uncorrectly.  The following is an
+-- 'unsafeFromListFL' can also be used incorrectly.  The following is an
 -- example of 'unsafeFromListFL' allowing you to create a 'FocusList' that does
 -- not pass 'invariantFL'.
 --
